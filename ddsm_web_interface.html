@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Панель управления роботом</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				background-color: #252424;
+				margin: 0;
+				padding: 20px;
+			}
+			.control-panel {
+				background-color: rgb(145, 139, 139);
+				padding: 20px;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+				margin-bottom: 20px;
+				width: 100%;
+				max-width: 400px;
+			}
+			.device-panel {
+				background-color: rgb(145, 139, 139);
+				padding: 20px;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+				margin-bottom: 20px;
+				width: 100%;
+				max-width: 400px;
+			}
+			.gamepad {
+				width: 240px;
+				height: 240px;
+				position: relative;
+				margin: 20px auto;
+				background-color: rgb(145, 139, 139);
+				border-radius: 10px;
+				padding: 20px;
+				box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				grid-template-rows: repeat(3, 1fr);
+				gap: 10px;
+			}
+			.direction-btn {
+				width: 70px;
+				height: 70px;
+				background-color: #4caf50;
+				color: white;
+				border: none;
+				border-radius: 12px;
+				cursor: pointer;
+				font-size: 28px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: all 0.2s ease;
+				box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+			}
+			.direction-btn:hover {
+				background-color: #45a049;
+				transform: scale(1.05);
+				box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+			}
+			.direction-btn:active {
+				background-color: #3d8b40;
+				transform: scale(0.95);
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			}
+			#stopBtn {
+				width: 70px;
+				height: 70px;
+				background-color: #f44336;
+				color: white;
+				border: none;
+				border-radius: 12px;
+				cursor: pointer;
+				font-size: 28px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: all 0.2s ease;
+				box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+				grid-column: 2;
+				grid-row: 2;
+				margin: auto;
+			}
+			#stopBtn:hover {
+				background-color: #da190b;
+				transform: scale(1.05);
+				box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+			}
+			#stopBtn:active {
+				background-color: #d32f2f;
+				transform: scale(0.95);
+				box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+			}
+			.speed-control {
+				margin: 20px 0;
+				text-align: center;
+				background-color: #807c7c;
+				padding: 15px;
+				border-radius: 10px;
+				box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+			.speed-slider {
+				width: 200px;
+				margin: 10px 0;
+				-webkit-appearance: none;
+				height: 8px;
+				background: #ddd;
+				border-radius: 4px;
+				outline: none;
+			}
+			.speed-slider::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				appearance: none;
+				width: 20px;
+				height: 20px;
+				background: #4caf50;
+				border-radius: 50%;
+				cursor: pointer;
+				transition: all 0.2s ease;
+			}
+			.speed-slider::-webkit-slider-thumb:hover {
+				transform: scale(1.1);
+				background: #45a049;
+			}
+			.speed-value-display {
+				font-size: 16px;
+				color: #333;
+				margin-top: 8px;
+				font-weight: bold;
+			}
+			.status {
+				margin-top: 20px;
+				padding: 10px;
+				border-radius: 5px;
+				background-color: #e8f5e9;
+			}
+			#stopBtn,
+			#scanBtn,
+			#connectBtn {
+				background-color: #f44336;
+				color: rgb(21, 71, 8);
+				padding: 10px 20px;
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+				margin: 10px 0;
+			}
+			#scanBtn {
+				background-color: #2196f3;
+			}
+			#connectBtn {
+				background-color: #4caf50;
+			}
+			#scanBtn:hover {
+				background-color: #1976d2;
+			}
+			#connectBtn:hover {
+				background-color: #45a049;
+			}
+			.device-list {
+				margin-top: 10px;
+				max-height: 200px;
+				overflow-y: auto;
+			}
+			.device-item {
+				padding: 10px;
+				margin: 5px 0;
+				background-color: #f5f5f5;
+				border-radius: 5px;
+				cursor: pointer;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+			}
+			.device-item:hover {
+				background-color: #e0e0e0;
+			}
+			.device-item.selected {
+				background-color: #e3f2fd;
+				border: 1px solid #2196f3;
+			}
+			.scanning {
+				animation: pulse 1.5s infinite;
+			}
+			@keyframes pulse {
+				0% {
+					opacity: 1;
+				}
+				50% {
+					opacity: 0.5;
+				}
+				100% {
+					opacity: 1;
+				}
+			}
+			.ip-input {
+				display: flex;
+				gap: 10px;
+				margin-bottom: 10px;
+			}
+			.ip-input input {
+				flex: 1;
+				padding: 8px;
+				border: 1px solid #ddd;
+				border-radius: 5px;
+				font-size: 14px;
+			}
+			.ip-input input:focus {
+				outline: none;
+				border-color: #2196f3;
+			}
+			.device-section {
+				margin-top: 20px;
+				padding-top: 20px;
+				border-top: 1px solid #eee;
+			}
+			.section-title {
+				font-size: 16px;
+				color: #666;
+				margin-bottom: 10px;
+			}
+			.history-section {
+				margin-top: 20px;
+				padding-top: 20px;
+				border-top: 1px solid #eee;
+			}
+			.history-item {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 8px;
+				margin: 5px 0;
+				background-color: #f5f5f5;
+				border-radius: 5px;
+				cursor: pointer;
+			}
+			.history-item:hover {
+				background-color: #e0e0e0;
+			}
+			.history-item .delete-btn {
+				color: #f44336;
+				cursor: pointer;
+				padding: 4px 8px;
+				border-radius: 3px;
+			}
+			.history-item .delete-btn:hover {
+				background-color: #ffebee;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="device-panel">
+			<h2>Управление оборудованием</h2>
+
+			<!-- 手动输入IP部分 -->
+			<div class="section-title">Ручное подключение</div>
+			<div class="ip-input">
+				<input type="text" id="ipInput" placeholder="输入设备IP地址 (例如: 192.168.4.1)" value="192.168.4.1" />
+				<button id="connectBtn">связь</button>
+			</div>
+
+			<!-- Раздел истории подключений -->
+			<div class="history-section">
+				<div class="section-title">История подключений</div>
+				<div id="historyList">
+					<!-- История будет отображаться здесь -->
+				</div>
+			</div>
+
+			<!-- Автоматическое сканирование детали -->
+			<div class="device-section">
+				<div class="section-title">Автоматическое сканирование</div>
+				<button id="scanBtn">Сканирующее оборудование</button>
+				<div class="device-list" id="deviceList">
+					<!-- Здесь будет отображен список устройств -->
+				</div>
+			</div>
+		</div>
+
+		<div class="control-panel">
+			<h2>Панель управления роботом</h2>
+			<div class="gamepad">
+				<div></div>
+				<button class="direction-btn" id="forward" style="margin: auto;">↑</button>
+				<div></div>
+				<button class="direction-btn" id="left" style="margin: auto;">←</button>
+				<button id="stopBtn">■</button>
+				<button class="direction-btn" id="right" style="margin: auto;">→</button>
+				<div></div>
+				<button class="direction-btn" id="backward" style="margin: auto;">↓</button>
+				<div></div>
+			</div>
+			<div class="speed-control">
+				<label for="speed">Регулирование скорости</label>
+				<input type="range" id="speed" class="speed-slider" min="0" max="280" value="20" />
+				<div class="speed-value-display">Текущая скорость: <span id="speedValue">20</span></div>
+			</div>
+			<div class="status" id="status">Статус: Готов</div>
+		</div>
+
+		<script>
+			let boardIp = '192.168.4.1';
+			let baseUrl = `http://${boardIp}/js`;
+			let currentSpeed = 5;
+			let scanning = false;
+
+			// localStorage
+			function loadHistory() {
+				try {
+					const history = JSON.parse(localStorage.getItem('deviceHistory')) || [];
+					return history;
+				} catch (error) {
+					console.error('Сбой в загрузке истории:', error);
+					return [];
+				}
+			}
+
+			// Сохраните историю в localStorage
+			function saveHistory(history) {
+				try {
+					localStorage.setItem('deviceHistory', JSON.stringify(history));
+				} catch (error) {
+					console.error('Не удалось сохранить историю:', error);
+				}
+			}
+
+			// Добавить устройство в историю
+			function addToHistory(ip) {
+				const history = loadHistory();
+				// Если он уже существует, перейдите на передний план
+				const index = history.indexOf(ip);
+				if (index > -1) {
+					history.splice(index, 1);
+				}
+				history.unshift(ip);
+				// Сохраняйте только 10 самых последних записей
+				if (history.length > 10) {
+					history.pop();
+				}
+				saveHistory(history);
+				updateHistoryDisplay();
+			}
+
+			// Удалить устройство из истории
+			function removeFromHistory(ip) {
+				const history = loadHistory();
+				const index = history.indexOf(ip);
+				if (index > -1) {
+					history.splice(index, 1);
+					saveHistory(history);
+					updateHistoryDisplay();
+				}
+			}
+
+			// Отображение истории обновлений
+			function updateHistoryDisplay() {
+				const historyList = document.getElementById('historyList');
+				const history = loadHistory();
+				historyList.innerHTML = '';
+
+				history.forEach((ip) => {
+					const historyItem = document.createElement('div');
+					historyItem.className = 'history-item';
+
+					const ipText = document.createElement('span');
+					ipText.textContent = ip;
+					ipText.onclick = async () => {
+						document.getElementById('ipInput').value = ip;
+						await connectDevice(ip);
+					};
+
+					const deleteBtn = document.createElement('span');
+					deleteBtn.className = 'delete-btn';
+					deleteBtn.textContent = '×';
+					deleteBtn.onclick = (e) => {
+						e.stopPropagation();
+						removeFromHistory(ip);
+					};
+
+					historyItem.appendChild(ipText);
+					historyItem.appendChild(deleteBtn);
+					historyList.appendChild(historyItem);
+				});
+			}
+
+			// Регулятор скорости с помощью ползунка
+			const speedSlider = document.getElementById('speed');
+			const speedValue = document.getElementById('speedValue');
+			speedSlider.addEventListener('input', (e) => {
+				currentSpeed = parseInt(e.target.value);
+				speedValue.textContent = currentSpeed;
+			});
+
+			// Сгенерировать команду двигателя
+			function motorCommandJson(motorId, rpm, act = 3) {
+				return JSON.stringify({
+					T: 10010,
+					id: motorId,
+					cmd: rpm,
+					act: act,
+				});
+			}
+
+			// Управление двигателем осуществляется с одной стороны
+			function ctrlRpmSideJson(side, rpm, act = 3) {
+				const commands = [];
+				if (side === 'left') {
+					commands.push(motorCommandJson(1, rpm, act));
+					commands.push(motorCommandJson(3, rpm, act));
+				} else if (side === 'right') {
+					commands.push(motorCommandJson(2, rpm, act));
+					commands.push(motorCommandJson(4, rpm, act));
+				}
+				return commands;
+			}
+
+			// Сгенерировать команду перемещения
+			function moveJson(direction, rpm, act = 3) {
+				const commands = [];
+				if (direction) {
+					commands.push(...ctrlRpmSideJson('left', rpm, act));
+					commands.push(...ctrlRpmSideJson('right', -rpm, act));
+				} else {
+					commands.push(...ctrlRpmSideJson('left', rpm, act));
+					commands.push(...ctrlRpmSideJson('right', rpm, act));
+				}
+				return commands;
+			}
+
+			// Проверьте, отвечает ли устройство
+			async function checkDevice(ip) {
+				try {
+					const params = new URLSearchParams({
+						json: '{"T":10032,"id":1}',
+					});
+					const response = await fetch(`http://${ip}/js?${params}`, {
+						method: 'GET',
+						mode: 'no-cors', // добавить no-cors режим
+						headers: {
+							Accept: '*/*',
+						},
+						timeout: 1000,
+					});
+					return true; // в no-cors в режиме，мы не можем получить конкретный статус ответа, поэтому, если ошибка не возникает, он считается успешным.
+				} catch (error) {
+					console.error('Проверьте, нет ли ошибок в оборудовании:', error);
+					return false;
+				}
+			}
+
+			// Отправить команду
+			async function sendCommands(commands) {
+				const status = document.getElementById('status');
+				try {
+					for (const cmd of commands) {
+						const params = new URLSearchParams({
+							json: cmd,
+						});
+						const response = await fetch(`${baseUrl}?${params}`, {
+							method: 'GET',
+							mode: 'no-cors', // добавить no-cors режим
+							headers: {
+								Accept: '*/*',
+							},
+						});
+						status.textContent = `Статус: Команда отправлена ${cmd}`;
+					}
+				} catch (error) {
+					console.error('Ошибка отправки команды:', error);
+					status.textContent = `Статус: Не удалось отправить - ${error.message}`;
+				}
+			}
+
+			// Измените функцию соединительного устройства
+			async function connectDevice(ip) {
+				const status = document.getElementById('status');
+				status.textContent = `Статус: Подключаемое устройство ${ip}...`;
+
+				if (await checkDevice(ip)) {
+					boardIp = ip;
+					baseUrl = `http://${boardIp}/js`;
+					status.textContent = `Статус: Подключен к устройству ${ip}`;
+					addToHistory(ip); //Добавить в историю
+					return true;
+				} else {
+					status.textContent = `Статус: Сбой подключения-устройство ${ip} Нет ответа`;
+					return false;
+				}
+			}
+
+			// Измените функцию сканирующего устройства
+			async function scanDevices() {
+				if (scanning) return;
+				scanning = true;
+				const scanBtn = document.getElementById('scanBtn');
+				const deviceList = document.getElementById('deviceList');
+				const status = document.getElementById('status');
+
+				scanBtn.classList.add('scanning');
+				scanBtn.textContent = 'Сканирующий...';
+				deviceList.innerHTML = '';
+				status.textContent = 'Статус: Сканирующее устройство...';
+
+				try {
+					// Сначала проверьте устройство в истории
+					const history = loadHistory();
+					const devices = [];
+
+					// Проверьте устройство в истории
+					for (const ip of history) {
+						if (await checkDevice(ip)) {
+							devices.push(ip);
+						}
+					}
+
+					// Если в истории не найдено доступных устройств, просканируйте локальную сеть
+					if (devices.length === 0) {
+						const response = await fetch('https://api.ipify.org?format=json');
+						const data = await response.json();
+						const localIp = data.ip;
+						const ipBase = localIp.split('.').slice(0, 3).join('.');
+
+						for (let i = 1; i < 255; i++) {
+							const ip = `${ipBase}.${i}`;
+							if (!history.includes(ip) && (await checkDevice(ip))) {
+								devices.push(ip);
+							}
+						}
+					}
+
+					// Показывать обнаруженные устройства
+					devices.forEach((ip) => {
+						const deviceItem = document.createElement('div');
+						deviceItem.className = 'device-item';
+						deviceItem.textContent = `ESP32 оборудование (${ip})`;
+						deviceItem.onclick = async () => {
+							if (await connectDevice(ip)) {
+								document.querySelectorAll('.device-item').forEach((item) => {
+									item.classList.remove('selected');
+								});
+								deviceItem.classList.add('selected');
+							}
+						};
+						deviceList.appendChild(deviceItem);
+					});
+
+					if (devices.length === 0) {
+						status.textContent = 'Статус: Устройство не найдено';
+					}
+				} catch (error) {
+					status.textContent = `Статус: Проверка завершилась неудачей - ${error.message}`;
+				} finally {
+					scanning = false;
+					scanBtn.classList.remove('scanning');
+					scanBtn.textContent = 'Сканирующее оборудование';
+				}
+			}
+
+			// Инициализировать историю отображения
+			updateHistoryDisplay();
+
+			// События кнопки подключения вручную
+			document.getElementById('connectBtn').addEventListener('click', async () => {
+				const ipInput = document.getElementById('ipInput');
+				const ip = ipInput.value.trim();
+
+				// Простая проверка IP-адреса
+				if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+					document.getElementById('status').textContent = 'Статус: Пожалуйста, введите действительный IP-адрес';
+					return;
+				}
+
+				await connectDevice(ip);
+			});
+
+			// Событие кнопки сканирования
+			document.getElementById('scanBtn').addEventListener('click', scanDevices);
+
+			// Обработка событий с кнопками
+			document.getElementById('forward').addEventListener('mousedown', () => {
+				sendCommands(moveJson(true, -currentSpeed));
+			});
+
+			document.getElementById('backward').addEventListener('mousedown', () => {
+				sendCommands(moveJson(true, currentSpeed));
+			});
+
+			document.getElementById('left').addEventListener('mousedown', () => {
+				sendCommands(moveJson(false, -currentSpeed));
+			});
+
+			document.getElementById('right').addEventListener('mousedown', () => {
+				sendCommands(moveJson(false, currentSpeed));
+			});
+
+			document.getElementById('stopBtn').addEventListener('click', () => {
+				sendCommands(moveJson(true, 0));
+			});
+
+			// Поддержка сенсорных событий
+			document.getElementById('forward').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				sendCommands(moveJson(true, currentSpeed));
+			});
+
+			document.getElementById('backward').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				sendCommands(moveJson(true, -currentSpeed));
+			});
+
+			document.getElementById('left').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				sendCommands(moveJson(false, -currentSpeed));
+			});
+
+			document.getElementById('right').addEventListener('touchstart', (e) => {
+				e.preventDefault();
+				sendCommands(moveJson(false, currentSpeed));
+			});
+		</script>
+	</body>
+</html>
